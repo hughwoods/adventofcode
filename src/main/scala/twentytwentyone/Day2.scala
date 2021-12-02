@@ -8,6 +8,11 @@ object Day2 {
 
   lazy val commands: Seq[Command] = parseInput(input())
 
+  def main(args: Array[String]): Unit = {
+    println(Part1.result)
+    println(Part2.result)
+  }
+
   def input(): Seq[String] =
     Source.fromResource("2021/input_day_2.txt").getLines.toSeq
 
@@ -35,12 +40,9 @@ object Day2 {
   }
 
   object Part1 {
-    val startPosition = Position(0, 0)
-
-    def main(args: Array[String]): Unit = {
-      val finalPosition: Position = commands.foldLeft(startPosition)(updatePosition)
-      println(s"Part 1: ${finalPosition.horizontal * finalPosition.depth}")
-    }
+    lazy val startPosition = Position(0, 0)
+    lazy val finalPosition: Position = commands.foldLeft(startPosition)(updatePosition)
+    lazy val result: String = s"Part 1: ${finalPosition.horizontal * finalPosition.depth}"
 
     def updatePosition(pos: Position, com: Command) = com match {
       case Command(Up, n)      => pos.copy(depth = pos.depth - n)
@@ -52,12 +54,9 @@ object Day2 {
   }
 
   object Part2 {
-    val startPosition = Position(0, 0, 0)
-
-    def main(args: Array[String]): Unit = {
-      val finalPosition: Position = commands.foldLeft(startPosition)(updatePosition)
-      println(s"Part 2: ${finalPosition.horizontal * finalPosition.depth}")
-    }
+    lazy val startPosition = Position(0, 0, 0)
+    lazy val finalPosition: Position = commands.foldLeft(startPosition)(updatePosition)
+    lazy val result = s"Part 2: ${finalPosition.horizontal * finalPosition.depth}"
 
     def updatePosition(pos: Position, com: Command) = com match {
       case Command(Up, n)   => pos.copy(aim = pos.aim - n)
