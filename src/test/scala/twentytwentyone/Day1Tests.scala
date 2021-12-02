@@ -2,7 +2,7 @@ package twentytwentyone
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should._
-import twentytwentyone.Day1.{countOfIncreasingReadings, increases}
+import twentytwentyone.Day1.{increases, tripletIncreases}
 import twentytwentyone.Day1Tests.sampleInput
 
 class Day1Tests extends AnyFunSpec with Matchers {
@@ -24,7 +24,7 @@ class Day1Tests extends AnyFunSpec with Matchers {
 
   describe("Windowed Increases") {
     it("should return 5 for sample input") {
-      countOfIncreasingReadings(3)(sampleInput) should be(5)
+      tripletIncreases(sampleInput) should be(5)
     }
   }
 
