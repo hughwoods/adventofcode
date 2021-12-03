@@ -11,6 +11,8 @@ object Day2 {
   def main(args: Array[String]): Unit = {
     println(Part1.result)
     println(Part2.result)
+    println(TerseSolution.partOneResult)
+    println(TerseSolution.partTwoResult)
   }
 
   def input(): Seq[String] =
@@ -69,5 +71,21 @@ object Day2 {
     }
 
     case class Position(depth: Int, horizontal: Int, aim: Int)
+  }
+
+  object TerseSolution {
+    val commands = input()
+      .map(_.split(' ').toSeq)
+      .map(s => (s(0)(0), s(1).toInt))
+      .map {
+        case ('f', n) => (n, 0)
+        case ('d', n) => (0, n)
+        case ('u', n) => (0, -n)
+      }
+    val partOnePosition = commands.reduce((a, b) => (a._1 + b._1, a._2 + b._2))
+    val partOneResult = partOnePosition._1 * partOnePosition._2
+    val partTwoPosition =
+      commands.foldLeft(0, 0, 0)((a, b) => (a._1 + b._1, a._2 + (b._1 * a._3), a._3 + b._2))
+    val partTwoResult = partTwoPosition._1 * partTwoPosition._2
   }
 }
