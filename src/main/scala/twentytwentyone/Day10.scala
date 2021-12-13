@@ -36,7 +36,7 @@ object Day10 {
 
   def midpointValue[A](l: Seq[A])(implicit ord: Ordering[A]): A = l.sorted.apply(l.length / 2)
 
-  def complete(oc: Option[OpenChunk]) = {
+  def complete(oc: Option[OpenChunk]): String = {
     @tailrec
     def completeAcc(oc: Option[OpenChunk], acc: String): String =
       oc match {
