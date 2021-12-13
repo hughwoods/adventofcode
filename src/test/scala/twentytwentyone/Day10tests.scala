@@ -2,15 +2,7 @@ package twentytwentyone
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import twentytwentyone.Day10.{
-  AngleChunk,
-  ParenChunk,
-  SquareChunk,
-  complete,
-  result1,
-  result2,
-  scoreCompletion
-}
+import twentytwentyone.Day10.{Chunk, result1, result2}
 
 class Day10Tests extends AnyFunSpec with Matchers {
   val testInput = Seq(
@@ -29,12 +21,15 @@ class Day10Tests extends AnyFunSpec with Matchers {
   describe("chunk parser") {
     it("should parse simple input") {
       val result = Day10.parsers.chunk.parse("<>")
-      result should be(Right("", AngleChunk(Nil)))
+      result should be(Right("", Chunk('<', '>', Nil)))
     }
 
     it("should parse complex input") {
       Day10.parsers.chunk.parse("<<>([])>") should be(
-        Right("", AngleChunk(List(AngleChunk(Nil), ParenChunk(List(SquareChunk(Nil))))))
+        Right(
+          "",
+          Chunk('<', '>', List(Chunk('<', '>', Nil), Chunk('(', ')', List(Chunk('[', ']', Nil)))))
+        )
       )
     }
   }
