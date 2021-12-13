@@ -9,7 +9,7 @@ object Day10 {
 
   val input = Source.fromResource("2021/input_day_10.txt").getLines().toSeq
 
-  val result1 = input
+  def result1(input: Seq[String]): Long = input
     .map(s => (s, Day10.parsers.chunks.parse(s)))
     .collect { case (s, Left(Error(offset, _))) => s(offset) }
     .map {
@@ -28,7 +28,7 @@ object Day10 {
       .map(complete)
       .map(scoreCompletion)
 
-    val index = (completionScores.length) / 2
+    val index = completionScores.length / 2
     completionScores.sorted.apply(index)
   }
 
@@ -54,7 +54,7 @@ object Day10 {
     }
 
   def main(args: Array[String]): Unit = {
-    println(s"part1: $result1")
+    println(s"part1: ${result1(input)}")
     println(s"part2: ${result2(input)}")
   }
 

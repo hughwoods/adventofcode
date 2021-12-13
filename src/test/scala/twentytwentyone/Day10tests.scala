@@ -1,6 +1,5 @@
 package twentytwentyone
 
-import cats.parse.Parser.Error
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import twentytwentyone.Day10.{
@@ -8,11 +7,25 @@ import twentytwentyone.Day10.{
   ParenChunk,
   SquareChunk,
   complete,
+  result1,
   result2,
   scoreCompletion
 }
 
 class Day10Tests extends AnyFunSpec with Matchers {
+  val testInput = Seq(
+    "[({(<(())[]>[[{[]{<()<>>",
+    "[(()[<>])]({[<{<<[]>>(",
+    "{([(<{}[<>[]}>{[]{[(<()>",
+    "(((({<>}<{<{<>}{[]{[]{}",
+    "[[<[([]))<([[{}[[()]]]",
+    "[{[{({}]{}}([{[{{{}}([]",
+    "{<[[]]>}<{[{[{[]{()[[[]",
+    "[<(<(<(<{}))><([]([]()",
+    "<{([([[(<>()){}]>(<<{{",
+    "<{([{{}}[<[[[<>{}]]]>[]]"
+  )
+
   describe("chunk parser") {
     it("should parse simple input") {
       val result = Day10.parsers.chunk.parse("<>")
@@ -24,6 +37,8 @@ class Day10Tests extends AnyFunSpec with Matchers {
         Right("", AngleChunk(List(AngleChunk(Nil), ParenChunk(List(SquareChunk(Nil))))))
       )
     }
+  }
+  describe("chunks parser") {
 
     it("should parse open input") {
       val res = Day10.parsers.chunks.parse("[](")
@@ -33,47 +48,12 @@ class Day10Tests extends AnyFunSpec with Matchers {
 
     }
 
-    it("should solve part 2 for test input") {
-      val r1 = Seq(
-        "[({(<(())[]>[[{[]{<()<>>",
-        "[(()[<>])]({[<{<<[]>>(",
-        "{([(<{}[<>[]}>{[]{[(<()>",
-        "(((({<>}<{<{<>}{[]{[]{}",
-        "[[<[([]))<([[{}[[()]]]",
-        "[{[{({}]{}}([{[{{{}}([]",
-        "{<[[]]>}<{[{[{[]{()[[[]",
-        "[<(<(<(<{}))><([]([]()",
-        "<{([([[(<>()){}]>(<<{{",
-        "<{([{{}}[<[[[<>{}]]]>[]]"
-      )
-      result2(r1) should be(288957)
-    }
-
     it("should get results for test input") {
-      Seq(
-        "[({(<(())[]>[[{[]{<()<>>",
-        "[(()[<>])]({[<{<<[]>>(",
-        "{([(<{}[<>[]}>{[]{[(<()>",
-        "(((({<>}<{<{<>}{[]{[]{}",
-        "[[<[([]))<([[{}[[()]]]",
-        "[{[{({}]{}}([{[{{{}}([]",
-        "{<[[]]>}<{[{[{[]{()[[[]",
-        "[<(<(<(<{}))><([]([]()",
-        "<{([([[(<>()){}]>(<<{{",
-        "<{([{{}}[<[[[<>{}]]]>[]]"
-      ).map(s => (s, Day10.parsers.chunks.parse(s)))
-        .collect { case (s, Left(Error(offset, _))) =>
-          s(offset)
-        }
-        .map {
-          case ')' => 3
-          case ']' => 57
-          case '}' => 1197
-          case '>' => 25137
-        }
-        .sum should be(26397)
+      result1(testInput) should be(26397)
     }
 
+    it("should solve part 2 for test input") {
+      result2(testInput) should be(288957)
+    }
   }
-
 }
