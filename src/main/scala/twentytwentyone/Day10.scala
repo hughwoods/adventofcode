@@ -1,38 +1,35 @@
 package twentytwentyone
 
+import cats.implicits._
 import cats.parse.Parser.Error
 import cats.parse.{Parser, Parser0}
 
 import scala.Function.tupled
 import scala.annotation.tailrec
-import scala.io.Source
 
-object Day10 {
+object Day10 extends DayApp {
+  override val resourcePath: String = "2021/input_day_10.txt"
+  override val partOne: Seq[String] => Either[String, Long] = input =>
+    input
+      .map(s => (s, Day10.parsers.chunks.parse(s)))
+      .collect { case (s, Left(Error(offset, _))) => s(offset) }
+      .map(autoCompleteScore)
+      .sum
+      .toLong
+      .asRight
 
-  val input = Source.fromResource("2021/input_day_10.txt").getLines().toSeq
-  val chunkDefinitions: List[(Char, Char)] = List(('<', '>'), ('[', ']'), ('{', '}'), ('(', ')'))
-
-  def main(args: Array[String]): Unit = {
-    println(s"part1: ${result1(input)}")
-    println(s"part2: ${result2(input)}")
-  }
-
-  def result1(input: Seq[String]): Long = input
-    .map(s => (s, Day10.parsers.chunks.parse(s)))
-    .collect { case (s, Left(Error(offset, _))) => s(offset) }
-    .map(autoCompleteScore)
-    .sum
-
-  def autoCompleteScore = Map(')' -> 3, ']' -> 57, '}' -> 1197, '>' -> 25137)
-
-  def result2(input: Seq[String]): Long =
+  override val partTwo: Seq[String] => Either[String, Long] = input =>
     midpointValue(
       input
         .map(Day10.parsers.chunks.parse)
         .collect { case Right(("", chunks)) if chunks._2.isDefined => chunks._2 }
         .map(complete)
         .map(scoreCompletion)
-    )
+    ).asRight
+
+  val chunkDefinitions: List[(Char, Char)] = List(('<', '>'), ('[', ']'), ('{', '}'), ('(', ')'))
+  val autoCompleteScore = Map(')' -> 3, ']' -> 57, '}' -> 1197, '>' -> 25137)
+  val charScore = Map(')' -> 1, ']' -> 2, '}' -> 3, '>' -> 4)
 
   def midpointValue[A](l: Seq[A])(implicit ord: Ordering[A]): A = l.sorted.apply(l.length / 2)
 
@@ -56,11 +53,10 @@ object Day10 {
     scoreCompletionAcc(com.toList, 0)
   }
 
-  def charScore = Map(')' -> 1, ']' -> 2, '}' -> 3, '>' -> 4)
-
   case class Chunk(s: Char, t: Char, content: Seq[Chunk])
 
   case class OpenChunk(s: Char, t: Char, head: Seq[Chunk], tail: Option[OpenChunk])
+
   object OpenChunk {
     def apply(s: Char, t: Char)(tuple: (Seq[Chunk], Option[OpenChunk])): OpenChunk =
       OpenChunk(s, t, tuple._1, tuple._2)

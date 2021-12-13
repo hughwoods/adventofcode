@@ -2,7 +2,7 @@ package twentytwentyone
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import twentytwentyone.Day10.{Chunk, result1, result2}
+import twentytwentyone.Day10.{Chunk, partOne, partTwo}
 
 class Day10Tests extends AnyFunSpec with Matchers {
   val testInput = Seq(
@@ -44,11 +44,11 @@ class Day10Tests extends AnyFunSpec with Matchers {
     }
 
     it("should get results for test input") {
-      result1(testInput) should be(26397)
+      partOne(testInput) should be(26397)
     }
 
     it("should solve part 2 for test input") {
-      result2(testInput) should be(288957)
+      partTwo(testInput) should be(288957)
     }
   }
 }
