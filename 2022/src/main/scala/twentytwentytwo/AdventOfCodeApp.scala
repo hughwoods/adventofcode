@@ -7,46 +7,42 @@ import cats.implicits._
 import pureconfig._
 import pureconfig.generic.auto._
 
+import scala.util.chaining.scalaUtilChainingOps
+
 abstract class AdventOfCodeApp(year: Int, day: Int) extends IOApp.Simple {
-  def solve(input: PuzzleInput): IO[Either[AOCError, String]]
+  def solve(input: PuzzleInput): MyEffect[String]
 
   private def getConfiguration(
       source: ConfigSource
-  ): IO[Either[AOCError, ApplicationConfiguration]] =
-    IO(
+  ): MyEffect[ApplicationConfiguration] = {
+    val eith: Either[AOCError, ApplicationConfiguration] =
       source
         .load[ApplicationConfiguration]
-        .left
-        .map(e =>
+        .left.map(e =>
           new AOCError {
             val message = e.prettyPrint(0)
           }
         )
-    )
+
+    EitherT[IO, AOCError, ApplicationConfiguration](IO.pure(eith))
+  }
 
   private def createClient(
       conf: ApplicationConfiguration
-  ): EitherT[IO, AOCError, PuzzleInputClient] =
+  ): MyEffect[PuzzleInputClient] =
     EitherT.pure(PuzzleInputClient(conf.sessionToken))
 
-  private def getInput(client: PuzzleInputClient): Resource[IO, Either[AOCError, PuzzleInput]] =
+  private def getInput(client: PuzzleInputClient): Resource[MyEffect, PuzzleInput] =
     client.fetchResource(year, day)
 
   def run: IO[Unit] = {
-    val defaultConfiguration: EitherT[IO, AOCError, ApplicationConfiguration] = EitherT(
+    val defaultConfiguration: MyEffect[ApplicationConfiguration] =
       getConfiguration(ConfigSource.default)
-    )
 
-    def solver(in: Either[AOCError, PuzzleInput]): IO[Either[AOCError, String]] =
-      (for {
-        input <- EitherT(IO.pure(in))
-        solution <- EitherT(solve(input))
-      } yield solution).value
-
-    val solution: EitherT[IO, AOCError, String] = for {
+    val solution: MyEffect[String] = for {
       conf <- defaultConfiguration
       client <- createClient(conf)
-      result <- EitherT(getInput(client).use(solver))
+      result <- getInput(client).use(solve)
     } yield result
 
     solution.value.flatMap {
