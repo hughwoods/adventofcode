@@ -1,37 +1,32 @@
 package twentytwentytwo
 
-import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.Async
 import cats.effect.kernel.Resource
+import fs2.Stream
+import fs2.io.net.Network
 import fs2.text.{lines, utf8}
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.ember.client._
-import org.http4s.headers._
+import cats.implicits.{catsSyntaxEitherId, catsSyntaxMonadError}
 
-case class InputFetchError(message: String) extends AOCError
-
-case class PuzzleInputClient(sessionToken: String) {
-  private def bufferResponseAsLines(res: Response[MyEffect]): PuzzleInput =
-    res.body.through(utf8.decode).through(lines)
-
-  private def request(year: Int, day: Int): Request[MyEffect] = {
-    Request[MyEffect](
+case class PuzzleInputClient[F[_]](sessionToken: String)(implicit
+    network: Network[F],
+    F: Async[F]
+) {
+  private def request(year: Int, day: Int): Request[F] =
+    Request[F](
       method = GET,
       uri = Uri.unsafeFromString(s"https://adventofcode.com/$year/day/$day/input"),
       httpVersion = HttpVersion.`HTTP/1.1`
     ).addCookie(name = "session", content = sessionToken)
-  }
 
-  def fetchResource(
-      year: Int,
-      day: Int
-  ): Resource[MyEffect, PuzzleInput] =
+  def fetchResource(year: Int, day: Int): Resource[F, (Status, Stream[F, String])] =
     for {
-      client <- EmberClientBuilder.default[MyEffect].build
+      client <- EmberClientBuilder.default[F].build
       response <- client.run(request(year, day))
-    } yield {
-        bufferResponseAsLines(response)
-        // ToDo: status code handling
-    }
+    } yield (response.status, response
+        .body
+        .through(utf8.decode)
+        .through(lines))
 }

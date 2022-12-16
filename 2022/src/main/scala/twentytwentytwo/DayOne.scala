@@ -1,17 +1,18 @@
 package twentytwentytwo
 
+import cats.data.EitherT
+import cats.instances.all._
+import cats.effect.IO
+import fs2.Stream
+
 object DayOne extends AdventOfCodeApp(2022, 1) {
 
   sealed trait Input
 
   object Input {
     final case object Empty extends Input
-
     final case class FoodItem(calories: Int) extends Input
-
-    def parse(line: String): Input =
-      if (line.isEmpty) Empty
-      else FoodItem(calories = line.toInt)
+    def parse(line: String): Input = if (line.isEmpty) Empty else FoodItem(calories = line.toInt)
   }
 
   object PartOne {
@@ -31,12 +32,11 @@ object DayOne extends AdventOfCodeApp(2022, 1) {
   object PartTwo {
     case class Top3(_1: Int, _2: Int, _3: Int) {
       lazy val asList = List(_1, _2, _3).sorted
-
       lazy val total = _1 + _2 + _3
-
-      def upsert(newValue: Int): Top3 = if (newValue > this.asList.head)
-        Top3(newValue, this.asList(1), this.asList(2))
-      else this
+      def upsert(newValue: Int): Top3 =
+        if (newValue > this.asList.head)
+          Top3(newValue, this.asList(1), this.asList(2))
+        else this
     }
 
     case class Acc(best: Top3, current: Int)
@@ -57,7 +57,7 @@ object DayOne extends AdventOfCodeApp(2022, 1) {
   def accumulate(acc: (PartOne.Acc, PartTwo.Acc), in: Input) =
     (PartOne.accumulateElves(acc._1, in), PartTwo.accumulateElves(acc._2, in))
 
-  def solve(input: PuzzleInput): MyEffect[String] =
+  def solve(input: Stream[IO, String]): IO[String] =
     input
       .map(Input.parse)
       .fold(zero)(accumulate)
@@ -66,5 +66,4 @@ object DayOne extends AdventOfCodeApp(2022, 1) {
       }
       .compile
       .string
-
 }
